@@ -1,0 +1,26 @@
+{
+  "name": "web_project_around_express",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "lint": "npx eslint .",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pedro-ETS/web_project_around_express.git"
+  },
+  "author": "pedro torres salgado",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Pedro-ETS/web_project_around_express/issues"
+  },
+  "homepage": "https://github.com/Pedro-ETS/web_project_around_express#readme",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "nodemon": "^3.0.2"
+  }
+}
