@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const path = require('path');
 const fsPromises = require('fs').promises;
-router.get('/users', (req, res) => {
+
+router.get('/', (req, res) => {
   const filePathUsers = path.join(__dirname, '..', 'data', 'users.json');
   fsPromises.readFile(filePathUsers, { encoding: 'utf8' })
     .then((data) => {
@@ -12,7 +13,8 @@ router.get('/users', (req, res) => {
       res.status(500).send("Error interno en el servidor");
     });
 });
-router.get('/users/:userId', (req, res) => {
+
+router.get('/:userId', (req, res) => {
   const userId = req.params.userId;
   const filePathUsers = path.join(__dirname, '..', 'data', 'users.json');
   fsPromises.readFile(filePathUsers, { encoding: 'utf8' })
@@ -29,5 +31,6 @@ router.get('/users/:userId', (req, res) => {
       res.status(500).send('Error interno en el servidor');
     });
 });
+
 module.exports = router;
 
