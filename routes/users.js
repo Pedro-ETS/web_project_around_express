@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const path = require('path');
 const fsPromises = require('fs').promises;
+const { HttpStatus, HttpResponseMessage } = require("../enums/http");
 
 router.get('/', (req, res) => {
   const filePathUsers = path.join(__dirname, '..', 'data', 'users.json');
@@ -10,7 +11,7 @@ router.get('/', (req, res) => {
        res.json(jsonData);
     })
     .catch(err => {
-      res.status(500).send("Error interno en el servidor");
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
     });
 });
 
@@ -24,11 +25,11 @@ router.get('/:userId', (req, res) => {
       if (user) {
         res.json(user);
       } else {
-        res.status(404).json({ message: 'ID de usuario no encontrado' });
+        res.status(HttpStatus.NOT_FOUND).json({ message: 'ID de usuario no encontrado' });
       }
     })
     .catch(err => {
-      res.status(500).send('Error interno en el servidor');
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
     });
 });
 
