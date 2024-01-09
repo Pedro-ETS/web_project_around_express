@@ -24,8 +24,23 @@
 7. **Manejo de solicitudes y respuestas**
 - Express facilita el manejo de solicitudes y respuestas HTTP. Puedes establecer fácilmente encabezados, enviar respuestas JSON, servir archivos estáticos y gestionar la entrada del usuario.
 
-7. **Postman**
+8. **Postman**
 - Herramienta colaborativa que se utiliza principalmente para probar servicios web y APIs (Interfaz de Programación de Aplicaciones). Postman permite enviar solicitudes HTTP a servicios web y APIs para probar su funcionalidad. Puedes realizar solicitudes GET, POST, PUT, DELETE y otras, lo que facilita la verificación de la respuesta del servidor.
+
+9. **MongoDB**
+- MongoDB es una base de datos de documentos que ofrece una gran escalabilidad y flexibilidad, y un modelo de consultas e indexación avanzado.El modelo de documentos de MongoDB resulta muy fácil de aprender y usar, y proporciona a los desarrolladores todas las funcionalidades que necesitan para satisfacer los requisitos más complejos a cualquier escala.
+
+10. **Esquemas de validacion**
+- En Mongoose, un Schema (Esquema) es la estructura que indica cual es la forma en la que están estructurados los documentos que se almacenan en una colección de MongoDB. Cada schema esta compuesto por campos y tipos de datos permitidos, además de opciones para llevar acabo validación de dichos documentos
+
+11. **CRUD**
+- Estas operaciones permiten a los usuarios crear nuevos datos (Create), leer los existentes (Read), actualizarlos (Update) y eliminarlos (Delete). CRUD es una función esencial para muchos sistemas de información, ya que permite a los usuarios realizar tareas básicas de mantenimiento y gestión de datos.
+
+12. **Expreciones regulares**
+- Las expresiones regulares, también conocidas como regex o regexp, son patrones de búsqueda utilizados en procesamiento de texto para encontrar y/o manipular cadenas de caracteres. Estos patrones son especialmente útiles cuando se trabaja con texto y se necesita realizar operaciones complejas de búsqueda, validación o transformación de datos.
+
+13. **Manejo de errores**
+- Un error no manejado puede provocar la caída completa de una aplicación o de una parte crítica de ella. Al manejar los errores de manera adecuada, puedes diseñar una aplicación que sea más robusta y que pueda manejar situaciones inesperadas sin colapsar completamente.
 
 
 
