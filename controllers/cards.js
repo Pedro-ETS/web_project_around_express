@@ -1,10 +1,10 @@
-const card = require("../models/card");
+const cardModel = require("../models/card");
 
 const { HttpStatus, HttpResponseMessage } = require("../enums/http");
 
 module.exports.getCards = async (req, res) => {
   try {
-    const cards = await card.find({}).orFail();
+    const cards = await cardModel.find({}).orFail();
     res.send({ data: cards });
   } catch (error) {
     if (error.name === "DocumentNotFoundError") {
@@ -17,7 +17,7 @@ module.exports.createCard = async (req, res) => {
   try {
     const { name, link } = req.body;
     const owner = req.user._id;
-    const newCard = await card.create({ name, link, owner });
+    const newCard = await cardModel.create({ name, link, owner });
     res.send({ data: newCard });
   } catch (error) {
     if (error.name === "ValidationError") {
@@ -28,7 +28,7 @@ module.exports.createCard = async (req, res) => {
 };
 module.exports.deleteCard = async (req, res) => {
   try {
-    const existingCard = await card.findByIdAndDelete(req.params.id).orFail();
+    const existingCard = await cardModel.findByIdAndDelete(req.params.id).orFail();
     res.send({ data: existingCard });
   } catch (error) {
     if (error.name === "DocumentNotFoundError") {
@@ -43,7 +43,7 @@ module.exports.deleteCard = async (req, res) => {
 };
 module.exports.likeCard = async (req, res) => {
   try {
-    const updatedCard = await card.findByIdAndUpdate(
+    const updatedCard = await cardModel.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
       { new: true }
@@ -57,13 +57,13 @@ module.exports.dislikeCard = async (req, res) => {
   const cardId = req.params.cardId;
   const userId = req.user._id;
   try {
-    const updatedCard = await card.findByIdAndUpdate(
+    const updatedCard = await cardModel.findByIdAndUpdate(
       cardId,
       { $pull: { likes: userId } },
       { new: true }
     );
     if (!updatedCard) {
-       res.status(HttpStatus.NOT_FOUND).send({ error: 'Tarjeta no encontrada' });
+      return res.status(HttpStatus.NOT_FOUND).send({ error: 'Tarjeta no encontrada' });
     }
     res.send (updatedCard);
   } catch (error) {

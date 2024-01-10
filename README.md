@@ -41,11 +41,3 @@
 
 13. **Manejo de errores**
 - Un error no manejado puede provocar la caída completa de una aplicación o de una parte crítica de ella. Al manejar los errores de manera adecuada, puedes diseñar una aplicación que sea más robusta y que pueda manejar situaciones inesperadas sin colapsar completamente.
-
-
-
-
-
-
-
-

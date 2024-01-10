@@ -1,21 +1,21 @@
-const user = require("../models/user");
+const userModel = require("../models/user");
 
 const { HttpStatus, HttpResponseMessage } = require("../enums/http");
 
 module.exports.getUsers = async (req, res) => {
   try {
-    const user = await user.find({}).orFail();
-    res.send({ data: users });
+    const usersData = await userModel.find({}).orFail();
+    res.send({ data: usersData });
   } catch (error) {
     if (error.name === "DocumentNotFoundError") {
-      return res.status(HttpStatus.NOT_FOUND).send({ error: "No se encontraron tarjetas." });
+      return res.status(HttpStatus.NOT_FOUND).send({ error: "No se encontraron usuarios." });
     }
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
   }
 };
 module.exports.getUser = async (req, res) => {
   try {
-    const userData = await user.findById(req.params.userId).orFail();
+    const userData = await userModel.findById(req.params.userId).orFail();
     res.send({ userData });
   } catch (error) {
     if (error.name === "DocumentNotFoundError") {
@@ -29,7 +29,7 @@ module.exports.getUser = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   try {
     const { name, about, avatar } = req.body;
-    const newUser = await user.create({ name, about, avatar });
+    const newUser = await userModel.create({ name, about, avatar });
     res.send({ data: newUser });
   } catch (error) {
     if (error.name === "ValidationError") {
@@ -48,7 +48,7 @@ module.exports.updateAvatar = async (req, res) => {
     if (!isValidURL(avatar)) {
       return res.status(HttpStatus.BAD_REQUEST).send({ error: "La URL no es válida para una actualizacion" });
     }
-    const updateAvatar = await user.findByIdAndUpdate(
+    const updateAvatar = await userModel.findByIdAndUpdate(
       req.user._id,
       { avatar },
       { new: true }
@@ -62,10 +62,10 @@ module.exports.updateProfile = async (req, res) => {
   try {
     let { name, about } = req.body;
     const regex = /^[a-zA-Z0-9\s]{2,30}$/;
-    if (!regex.test(name) && !regex.test(about)) {
+    if (!regex.test(name) || !regex.test(about)) {
       return res.status(HttpStatus.BAD_REQUEST).send({ error: "datos no validos para actualizar el perfil" });
     }
-    const dataProfile = await user.findByIdAndUpdate(
+    const dataProfile = await userModel.findByIdAndUpdate(
       req.user._id,
       { name, about },
       { new: true }
@@ -73,7 +73,7 @@ module.exports.updateProfile = async (req, res) => {
     res.send({ data: dataProfile });
   } catch (error) {
     if (error.name === "DocumentNotFoundError") {
-      return res.status(HttpStatus.NOT_FOUND).send({ error: "datos invalidos." });
+      return res.status(HttpStatus.NOT_FOUND).send({ error: "usuario no encontrado." });
     }
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
   }
