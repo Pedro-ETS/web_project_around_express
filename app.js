@@ -1,13 +1,10 @@
 const express = require("express");
-
 const app = express();
-
 const mongoose = require("mongoose");
-
+const auth = require('./middleware/auth');
+const {createUser, login} = require('./controllers/users');
 const usersRouter = require("./routes/users");
-
 const cardsRouter = require("./routes/cards");
-
 const { HttpStatus, HttpResponseMessage } = require("./enums/http");
 
 mongoose.connect("mongodb://localhost:27017/aroundb", {
@@ -16,15 +13,13 @@ mongoose.connect("mongodb://localhost:27017/aroundb", {
 });
 
 app.use(express.json());
-app.use((req, res, next) => {
-  req.user = {
-    _id: "659afee40b4aa06cac6ebff3",
-  };
-
-  next();
-});
+app.post('/signin', login);
+app.post('/signup', createUser);
+app.use(auth);
 app.use("/users", usersRouter);
 app.use("/cards", cardsRouter);
+
+
 app.use((req, res) => {
   return res
     .status(HttpStatus.BAD_REQUEST)
