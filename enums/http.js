@@ -6,6 +6,7 @@ const HttpStatus = Object.freeze({
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   INTERNAL_SERVER_ERROR: 500,
+  CONFLICT: 409,
 });
 const HttpResponseMessage = Object.freeze({
   SUCCESS: 'Success',

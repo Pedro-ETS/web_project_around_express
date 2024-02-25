@@ -1,24 +1,38 @@
 const userModel = require("../models/user");
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { HttpStatus, HttpResponseMessage } = require("../enums/http");
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-
-  return userModel.findUserByCredentials(email, password)
+  if (!password) {
+    return res
+      .status(HttpStatus.BAD_REQUEST)
+      .send({ message: "La contraseña no está definida" });
+  }
+  return userModel
+    .findUserByCredentials(email, password)
     .then((user) => {
-    res.send({
-      token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }),
-    });
-  })
+      res.send({
+        token: jwt.sign({ _id: user._id }, "super-strong-secret", {
+          expiresIn: "7d",
+        }),
+      });
+    })
     .catch((err) => {
-    res.status(HttpStatus.UNAUTHORIZED).send({ message: err.message });
-  });
+      next(err);
+    });
 };
-
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next ) => {
   try {
     const { name, about, avatar, email, password } = req.body;
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(HttpStatus.CONFLICT)
+        .send({ message: "El usuario ya existe" });
+    }
+
     const hash = await bcrypt.hash(password, 10);
     const user = await userModel.create({
       name,
@@ -27,63 +41,99 @@ module.exports.createUser = async (req, res) => {
       email,
       password: hash,
     });
-    res.status(201).send({
+
+    res.status(HttpStatus.OK).send({
       _id: user._id,
       email: user.email,
     });
   } catch (err) {
-    res.status(HttpStatus.BAD_REQUEST).send(err);
+    next(err);
   }
 };
-
-module.exports.getCurrentUser = async (req, res) => {
+module.exports.getCurrentUser = async (req, res, next) => {
   try {
-    const userId = req.user._id; // Se obtiene el ID del usuario desde el token
-    const user = await User.findById(userId);
+    const userId = req.user._id;
+    console.log(userId);
+    const user = await userModel.findById(userId);
     if (!user) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: "Usuario no encontrado" });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: "Usuario no encontrado" });
     }
     res.status(200).json(user);
   } catch (error) {
     next(error);
   }
 };
+module.exports.updateUserProfile = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const loggedInUserId = req.user._id;
+    if (userId !== loggedInUserId) {
+      return res
+        .status(HttpStatus.FORBIDDEN)
+        .send({ message: "No tienes permiso para editar este perfil" });
+    }
+    const user = await userModel.findByIdAndUpdate(userId, updates, {
+      new: true,
+    });
 
-module.exports.getUsers = async (req, res) => {
+    if (!user) {
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send({ message: "Usuario no encontrado" });
+    }
+
+    res
+      .status(HttpStatus.OK)
+      .send({ message: "Perfil actualizado correctamente", user });
+  } catch (error) {
+    next(error);
+  }
+};
+module.exports.getUsers = async (req, res, next) => {
   try {
     const usersData = await userModel.find({}).orFail();
     res.send({ data: usersData });
   } catch (error) {
     if (error.name === "DocumentNotFoundError") {
-      return res.status(HttpStatus.NOT_FOUND).send({ error: "No se encontraron usuarios." });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send({ error: "No se encontraron usuarios." });
     }
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
+    next(error);
   }
 };
-
-module.exports.getUser = async (req, res) => {
+module.exports.getUser = async (req, res, next) => {
   try {
     const userData = await userModel.findById(req.params.userId).orFail();
     res.send({ userData });
   } catch (error) {
     if (error.name === "DocumentNotFoundError") {
-      return res.status(HttpStatus.NOT_FOUND).send({ error: "No se encontro el usuario" });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send({ error: "No se encontro el usuario" });
     } else if (error.name === "CastError") {
-      return res.status(HttpStatus.BAD_REQUEST).send({ error: "ID de usuario inválido." });
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send({ error: "ID de usuario inválido." });
     }
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: "Error al obtener el usuario." });
+    next(error);
   }
 };
 
 function isValidURL(url) {
-  //valido manualmente ya que mongoose no valida mediante los mtodos findByIdAndUpdate
-  return /https?:\/\/(www\.)?[a-zA-Z0-9\-]+(\.[a-zA-Z]{2,})?([a-zA-Z0-9\-._~:\/?%#\[\]@!$&'()*+,;=]*)?/.test(url);
+  return /https?:\/\/(www\.)?[a-zA-Z0-9\-]+(\.[a-zA-Z]{2,})?([a-zA-Z0-9\-._~:\/?%#\[\]@!$&'()*+,;=]*)?/.test(
+    url
+  );
 }
-module.exports.updateAvatar = async (req, res) => {
+module.exports.updateAvatar = async (req, res, next) => {
   try {
     let avatar = req.body.avatar;
     if (!isValidURL(avatar)) {
-      return res.status(HttpStatus.BAD_REQUEST).send({ error: "La URL no es válida para una actualizacion" });
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send({ error: "La URL no es válida para una actualizacion" });
     }
     const updateAvatar = await userModel.findByIdAndUpdate(
       req.user._id,
@@ -92,15 +142,17 @@ module.exports.updateAvatar = async (req, res) => {
     );
     res.send({ data: updateAvatar });
   } catch (error) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
+    next(error);
   }
 };
-module.exports.updateProfile = async (req, res) => {
+module.exports.updateProfile = async (req, res, next) => {
   try {
     let { name, about } = req.body;
     const regex = /^[a-zA-Z0-9\s]{2,30}$/;
     if (!regex.test(name) || !regex.test(about)) {
-      return res.status(HttpStatus.BAD_REQUEST).send({ error: "datos no validos para actualizar el perfil" });
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send({ error: "datos no validos para actualizar el perfil" });
     }
     const dataProfile = await userModel.findByIdAndUpdate(
       req.user._id,
@@ -110,8 +162,10 @@ module.exports.updateProfile = async (req, res) => {
     res.send({ data: dataProfile });
   } catch (error) {
     if (error.name === "DocumentNotFoundError") {
-      return res.status(HttpStatus.NOT_FOUND).send({ error: "usuario no encontrado." });
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send({ error: "usuario no encontrado." });
     }
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
+    next(error);
   }
 };

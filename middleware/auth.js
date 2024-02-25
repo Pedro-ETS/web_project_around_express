@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { HttpStatus, HttpResponseMessage } = require("../enums/http");
+const { HttpStatus } = require("../enums/http");
 
 const handleAuthError = (res) => {
   res
@@ -12,6 +12,9 @@ const extractBearerToken = (header) => {
 };
 
 module.exports = (req, res, next) => {
+  if (req.path === '/signup') {
+    return next();
+  }
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -28,6 +31,5 @@ module.exports = (req, res, next) => {
   }
 
   req.user = payload;
-
   next();
 };

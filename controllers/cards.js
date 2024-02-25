@@ -1,8 +1,7 @@
 const cardModel = require("../models/card");
-
 const { HttpStatus, HttpResponseMessage } = require("../enums/http");
 
-module.exports.getCards = async (req, res) => {
+module.exports.getCards = async (req, res, next) => {
   try {
     const cards = await cardModel.find({}).orFail();
     res.send({ data: cards });
@@ -10,10 +9,10 @@ module.exports.getCards = async (req, res) => {
     if (error.name === "DocumentNotFoundError") {
       return res.status(HttpStatus.NOT_FOUND).send({ error: "No se encontraron tarjetas." });
     }
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
+    next(error);
   }
 };
-module.exports.createCard = async (req, res) => {
+module.exports.createCard = async (req, res, next) => {
   try {
     const { name, link } = req.body;
     const owner = req.user._id;
@@ -23,25 +22,29 @@ module.exports.createCard = async (req, res) => {
     if (error.name === "ValidationError") {
       return res.status(HttpStatus.BAD_REQUEST).send({ error: "se pasaron datos invalidos al crear una card" });
     }
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
+    next(error);
   }
 };
-module.exports.deleteCard = async (req, res) => {
+module.exports.deleteCard = async (req, res, next) => {
+  console.log(req.params.cardId);
   try {
-    const existingCard = await cardModel.findByIdAndDelete(req.params.id).orFail();
-    res.send({ data: existingCard });
-  } catch (error) {
-    if (error.name === "DocumentNotFoundError") {
-      return res.status(HttpStatus.NOT_FOUND).send({ error: "Tarjeta no encontrada" });
-    } else if (error.name === "ValidationError") {
-      return res.status(HttpStatus.BAD_REQUEST).send(HttpResponseMessage.BAD_REQUEST);
-    } else if (error.name === "CastError") {
-      return res.status(HttpStatus.BAD_REQUEST).send({ error: "Invalid card ID" });
+    const cardId = req.params.cardId;
+    const userId = req.user._id;
+
+    const card = await cardModel.findById(cardId);
+    if (!card) {
+      return res.status(HttpStatus.NOT_FOUND).send({ message: "La tarjeta no existe" });
     }
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
+    if (card.owner.toString() !== userId) {
+      return res.status(HttpStatus.FORBIDDEN).json({ message: "No tienes permiso para borrar esta tarjeta" });
+    }
+    await cardModel.findByIdAndDelete(cardId);
+    res.status(HttpStatus.OK).json({ message: "Tarjeta eliminada correctamente" });
+  } catch (error) {
+    next(error);
   }
 };
-module.exports.likeCard = async (req, res) => {
+module.exports.likeCard = async (req, res, next) => {
   try {
     const updatedCard = await cardModel.findByIdAndUpdate(
       req.params.cardId,
@@ -50,10 +53,11 @@ module.exports.likeCard = async (req, res) => {
     );
     res.send({ data: updatedCard });
   } catch (error) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
+    next(error);
   }
 };
-module.exports.dislikeCard = async (req, res) => {
+
+module.exports.dislikeCard = async (req, res, next) => {
   const cardId = req.params.cardId;
   const userId = req.user._id;
   try {
@@ -67,6 +71,6 @@ module.exports.dislikeCard = async (req, res) => {
     }
     res.send (updatedCard);
   } catch (error) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(HttpResponseMessage.SERVER_ERROR);
+    next(error);
   }
 };
