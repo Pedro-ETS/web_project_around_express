@@ -5,11 +5,12 @@ const auth = require("./middleware/auth");
 const { celebrate, Joi } = require("celebrate");
 const validator = require("validator");
 const { errors } = require("celebrate");
+const cors = require('cors');
 const { login, createUser } = require("./controllers/users");
 const usersRouter = require("./routes/users");
 const cardsRouter = require("./routes/cards");
 const { HttpStatus, HttpResponseMessage } = require("./enums/http");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
+const { requestLogger, errorLogger } = require("./middleware/logger");
 
 const validateURL = (value, helpers) => {
   if (validator.isURL(value)) {
@@ -24,6 +25,8 @@ mongoose.connect("mongodb://localhost:27017/aroundb", {
 });
 
 app.use(express.json());
+app.use(cors());
+app.options('*', cors());
 app.use(requestLogger); //logger de solicitud
 app.post(
   "/signin",
@@ -56,7 +59,7 @@ app.use((req, res) => {
     .status(HttpStatus.BAD_REQUEST)
     .send(HttpResponseMessage.BAD_REQUEST);
 });
-app.use(errorLogger); // habilitar el logger de errores
+app.use(errorLogger);
 app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = HttpStatus.INTERNAL_SERVER_ERROR, message } = err;
