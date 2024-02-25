@@ -1,7 +1,12 @@
 # Tripleten web_project_around_express
 
 ### Descripción general
-*La funcionalidad de este proyecto es poner en práctica el back end, es decir trabajar del lado del servidor, mencionaré algunas de las tecnologías que aplique asi como también el framework que utilicé. Todo esto es muy esencial para poder implementar la lógica del servidor, gestionar datos, manejar solicitudes y respuestas HTTP, entre otras tareas relacionadas con el server.
+
+*Se enfocarán en la creación de mi propio servidor para el proyecto "Alrededor de los EE. UU.". Aprendere cómo trabajar con bases de datos, a configurar la seguridad y las pruebas, así como a desplegar el backend en una máquina remota.
+
+* Como tarea departe del bootcamp desplege en Google Cloud, solo que tuve problemas con mi cuenta y me suspendieron el servicio por lo cual  esta caido  
+
+La funcionalidad de este proyecto es poner en práctica el back end, configuración del entorno de desarrollo, configura editorConfi, configuración del servidor y hot reload, implementacion de rutas, estructuracion del proyecto acomodar carpetas, autorización y registro de usuarios, creaacion de middleware para autorización, esquemas de validacion, validacion de solicitudes verificar datos de entrada,  implementacion y conexion a una pequeña base de datos en mongooDB, variables de entorno, implementacion de registro de solicitudes y errores, Crear un Servidor en la Nube y Desplegar la API
 
 1. **Node.js**
 - Es el entorno de ejecución de JavaScript del lado del servidor que permite ejecutar código JavaScript en el servidor. En este caso, se utiliza para crear un servidor web.
